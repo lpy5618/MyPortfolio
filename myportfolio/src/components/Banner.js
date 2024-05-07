@@ -51,7 +51,7 @@ export const Banner = () => {
                 <Row className='align-items-center'>
                     <Col xs={12} md={6} xl={7}>
                         <span className='tagline'>Welcome to my Portfolio!</span>
-                        <h1>{`Hi, I'm Puyu(Jeff) Li `}<span className='wrap'>{text}</span></h1>
+                        <h1>{`Hi, I'm Jeff(Puyu) Li `}<span className='wrap'>{text}</span></h1>
                         <p>I am a passionate AI developer with a strong background in computer science and mathematics. I am proficient in machine learning, deep learning, and computer vision. I am also experienced in software development and data analysis. I am looking for opportunities to apply my skills to solve real-world problems.</p>
                         <button onClick={() => console.log('connect')}>Let's connect <ArrowRightCircle size={25} /></button>
                     </Col>

@@ -327,6 +327,7 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
     line-height: 1.5em;
     margin: 14px 0 75px 0;
 }
+
 .skill-slider {
   width: 80%;
   margin: 0 auto;
@@ -336,6 +337,22 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
   width: 50%;
   margin: 0 auto 15px auto;
 }
+
+.skill-slider .skill-card {
+  
+  width: 90%;
+  background:linear-gradient(90.21deg, #AA367C -5.91%, #4A2FBD 111.58%);
+  border-radius: 15px;
+  padding: 20px;
+}
+
+.skill-slider .skill-card li{
+  list-style-type: disc;
+  margin-bottom: 10px;
+  text-align: left;
+
+}
+
 .background-image-left {
   top: 28%;
   position: absolute;
