@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import contactImg from "../assets//img/contact-img.svg";
+import contactImg from "../assets/img/contact-img.svg";
 
 export const Contact = () => {
     const formInitialDetails = {
@@ -19,7 +19,7 @@ export const Contact = () => {
         setButtonText("Sending...");
         try {
             const response = await fetch(
-                "http://localhost:5000/contact",
+                "https://6wstddjxjl.execute-api.ap-southeast-2.amazonaws.com/default/portfolioSendEmail",
                 {
                     method: "POST",
                     headers: {
