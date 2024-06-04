@@ -10,7 +10,8 @@ import projImg3 from '../assets/img/project-img3.jpg';
 
 export const Projects = () => {
     const projects1 = [
-        {
+        {   
+            id: 1,
             title: "AI Powered Auto-branding API",
             description: "Design & Development",
             imgUrl: projImg1,
@@ -18,6 +19,7 @@ export const Projects = () => {
     ];
     const projects2 = [
         {
+            id: 2,
             title: "Advancing Human Movement Evaluation Using AI",
             description: "Main Coder & Developer",
             imgUrl: projImg2,
@@ -25,6 +27,7 @@ export const Projects = () => {
     ];
     const projects3 = [
         {
+            id: 3,
             title: "Standup Meeting App",
             description: "Design & Development",
             imgUrl: projImg3,
