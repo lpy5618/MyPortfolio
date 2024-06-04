@@ -1,38 +1,31 @@
+import React, { useEffect, useState } from 'react';
 import Nav from 'react-bootstrap/Nav';
 import Tab from 'react-bootstrap/Tab';
 import { Container, Row, Col } from 'react-bootstrap';
 import { ProjectCard } from './ProjectCard';
 import colorSharp2 from '../assets/img/color-sharp2.png';
-import projImg1 from '../assets/img/project-img1.png';
-import projImg2 from '../assets/img/project-img2.png';
-import projImg3 from '../assets/img/project-img3.jpg';
-
 
 export const Projects = () => {
-    const projects1 = [
-        {   
-            id: 1,
-            title: "AI Powered Auto-branding API",
-            description: "Design & Development",
-            imgUrl: projImg1,
-        }
-    ];
-    const projects2 = [
-        {
-            id: 2,
-            title: "Advancing Human Movement Evaluation Using AI",
-            description: "Main Coder & Developer",
-            imgUrl: projImg2,
-        }
-    ];
-    const projects3 = [
-        {
-            id: 3,
-            title: "Standup Meeting App",
-            description: "Design & Development",
-            imgUrl: projImg3,
-        }
-    ];
+    const [projects1, setProjects1] = useState([]);
+    const [projects2, setProjects2] = useState([]);
+    const [projects3, setProjects3] = useState([]);
+
+    useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                const response = await fetch('https://6wstddjxjl.execute-api.ap-southeast-2.amazonaws.com/default/portfolioSendEmail');
+                const data = await response.json();
+                setProjects1(data.slice(0, Math.ceil(data.length / 3)));
+                setProjects2(data.slice(Math.ceil(data.length / 3), 2 * Math.ceil(data.length / 3)));
+                setProjects3(data.slice(2 * Math.ceil(data.length / 3)));
+            } catch (error) {
+                console.error('Error fetching projects:', error);
+            }
+        };
+
+        fetchProjects();
+    }, []);
+
     return (
         <section className="project" id="project">
             <Container>
@@ -46,10 +39,10 @@ export const Projects = () => {
                                     <Nav.Link eventKey="first">Tab One</Nav.Link>
                                 </Nav.Item>
                                 <Nav.Item>
-                                    <Nav.Link eventKey="second">Tab two</Nav.Link>
+                                    <Nav.Link eventKey="second">Tab Two</Nav.Link>
                                 </Nav.Item>
                                 <Nav.Item>
-                                    <Nav.Link eventKey="third">Tab three</Nav.Link>
+                                    <Nav.Link eventKey="third">Tab Three</Nav.Link>
                                 </Nav.Item>
                             </Nav>
                             <Tab.Content>
@@ -81,5 +74,5 @@ export const Projects = () => {
             </Container>
             <img className='background-image-right' src={colorSharp2} alt=''></img>
         </section>
-    )
-}
+    );
+};
