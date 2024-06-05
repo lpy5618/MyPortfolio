@@ -13,7 +13,7 @@ export const Projects = () => {
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const response = await fetch('https://6wstddjxjl.execute-api.ap-southeast-2.amazonaws.com/default/portfolioSendEmail');
+                const response = await fetch('https://cienunkpi2.execute-api.ap-southeast-2.amazonaws.com/default/projects',{method: 'GET'});
                 const data = await response.json();
                 setProjects1(data.slice(0, Math.ceil(data.length / 3)));
                 setProjects2(data.slice(Math.ceil(data.length / 3), 2 * Math.ceil(data.length / 3)));

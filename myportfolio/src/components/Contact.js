@@ -19,7 +19,7 @@ export const Contact = () => {
         setButtonText("Sending...");
         try {
             const response = await fetch(
-                "https://6wstddjxjl.execute-api.ap-southeast-2.amazonaws.com/default/portfolioSendEmail",
+                "https://cienunkpi2.execute-api.ap-southeast-2.amazonaws.com/default/portfolioSendEmail",
                 {
                     method: "POST",
                     headers: {
