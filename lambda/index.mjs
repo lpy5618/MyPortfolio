@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { MongoClient, ObjectId } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -13,9 +13,11 @@ const contactEmail = nodemailer.createTransport({
 });
 
 const uri = process.env.MONGODB_URI;
-const client = new MongoClient(uri);
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
 export const handler = async (event) => {
+  console.log('Event: ', event);
+
   if (event.httpMethod === 'OPTIONS') {
     // Handle preflight request
     return {
@@ -23,7 +25,7 @@ export const handler = async (event) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST,OPTIONS,GET',
+        'Access-Control-Allow-Methods': 'POST,OPTIONS,GET,ANY',
       },
       body: '',
     };
@@ -78,9 +80,20 @@ export const handler = async (event) => {
       let response;
       if (event.pathParameters && event.pathParameters.id) {
         const projectId = event.pathParameters.id;
-        let query = { id: parseInt(projectId) };
+        console.log('Project ID: ', projectId);
+        const query = { id: parseInt(projectId) };
 
         const project = await projects.findOne(query);
+        if (!project) {
+          return {
+            statusCode: 404,
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+            },
+            body: JSON.stringify({ error: 'Project not found' }),
+          };
+        }
+
         response = {
           statusCode: 200,
           headers: {
@@ -117,7 +130,7 @@ export const handler = async (event) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify({ error: 'Method Not Allowed' }),
+      body: JSON.stringify({ error: 'Method Not Allowed'}),
     };
   }
 };
