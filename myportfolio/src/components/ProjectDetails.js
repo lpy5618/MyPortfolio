@@ -52,6 +52,26 @@ export const ProjectDetails = () => {
             <p>{project.description}</p>
           </Col>
         </Row>
+        <Row>
+          <Col>
+            <p>{project.summary}</p>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <p>{project.techStack}</p>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <p>{project.outcome}</p>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            <p>{project.conclusion}</p>
+          </Col>
+        </Row>
         {project.imgUrl && (
           <Row>
             <Col>
