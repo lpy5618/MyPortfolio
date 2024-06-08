@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Navbar, Container, Nav } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import logo from '../assets/img/logo.png';
 import navIcon1 from '../assets/img/nav-icon1.svg';
 import navIcon2 from '../assets/img/nav-icon2.svg';
 import resume from '../assets/files/Jeff Li - Resume.pdf';
+
 export const NavBar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [activeLink, setActiveLink] = useState('home');
+  const navigate = useNavigate();
+
   useEffect(() => {
     window.addEventListener('scroll', () => {
       if (window.scrollY > 50) {
@@ -16,9 +20,14 @@ export const NavBar = () => {
       }
     });
   }, []);
+
   const onUpdateActiveLink = (link) => {
     setActiveLink(link);
-  }
+    if (link === 'home') {
+      navigate('/');
+    }
+  };
+
   return (
     <Navbar expand="lg" className={scrolled ? "scrolled" : ""}>
       <Container>
@@ -35,7 +44,6 @@ export const NavBar = () => {
             <div className='social-icon'>
               <a href="https://www.linkedin.com/in/puyuli/"><img src={navIcon1} alt="" /></a>
               <a href="https://github.com/lpy5618"><img src={navIcon2} alt="" /></a>
-              {/* <a href="#"><img src={navIcon3} alt=""/></a> */}
             </div>
             <button className='connect-btn' onClick={() => console.log('connect')}><span>Let's Connect</span></button>
           </span>
