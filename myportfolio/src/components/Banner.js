@@ -17,9 +17,9 @@ export const Banner = () => {
         }, delta);
     
         return () => { clearInterval(ticker) };
-      }, [text])
+      }, [delta, loopNum, isDeleting, text]) // Include delta, loopNum, isDeleting, and text
     
-      const tick = () => {
+    const tick = () => {
         let i = loopNum % toRotate.length;
         let fullText = toRotate[i];
         let updatedText = isDeleting ? fullText.substring(0, text.length - 1) : fullText.substring(0, text.length + 1);
@@ -42,7 +42,7 @@ export const Banner = () => {
         } else {
           setIndex(prevIndex => prevIndex + 1);
         }
-      }
+    }
 
     return (
         <section className="banner" id="home">
@@ -54,9 +54,6 @@ export const Banner = () => {
                         <p>I am a passionate AI developer with a strong background in computer science and mathematics. I am proficient in machine learning, deep learning, and computer vision. I am also experienced in software development and data analysis. I am looking for opportunities to apply my skills to solve real-world problems.</p>
                         <button onClick={() => console.log('connect')}>Let's connect <ArrowRightCircle size={25} /></button>
                     </Col>
-                    {/* <Col xs={12} md={6} xl={5}>
-                        <img src={headerImg} alt="Header Img" />
-                    </Col> */}
                 </Row>
             </Container>
         </section>
