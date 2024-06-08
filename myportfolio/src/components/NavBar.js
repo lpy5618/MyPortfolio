@@ -28,6 +28,10 @@ export const NavBar = () => {
     }
   };
 
+  const handleConnectClick = () => {
+    window.open('https://www.linkedin.com/in/puyuli/', '_blank');
+  };
+
   return (
     <Navbar expand="lg" className={scrolled ? "scrolled" : ""}>
       <Container>
@@ -45,7 +49,7 @@ export const NavBar = () => {
               <a href="https://www.linkedin.com/in/puyuli/"><img src={navIcon1} alt="" /></a>
               <a href="https://github.com/lpy5618"><img src={navIcon2} alt="" /></a>
             </div>
-            <button className='connect-btn' onClick={() => console.log('connect')}><span>Let's Connect</span></button>
+            <button className='connect-btn' onClick={handleConnectClick}><span>Let's Connect</span></button>
           </span>
         </Navbar.Collapse>
       </Container>

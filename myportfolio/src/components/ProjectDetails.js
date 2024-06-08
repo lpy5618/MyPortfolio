@@ -111,7 +111,7 @@ export const ProjectDetails = () => {
       <Carousel>
         {images.map((imgUrl, index) => (
           <Carousel.Item key={index}>
-            <img className="d-block w-100 carousel-img" src={imgUrl} alt={`成果图片 ${index + 1}`} />
+            <img className="d-block carousel-img" src={imgUrl} alt={`demo images ${index + 1}`} />
           </Carousel.Item>
         ))}
       </Carousel>
