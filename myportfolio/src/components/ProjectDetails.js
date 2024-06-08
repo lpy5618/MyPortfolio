@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Carousel } from 'react-bootstrap';
+import { Container, Row, Col, Card, Carousel, Modal } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 
 export const ProjectDetails = () => {
   const { id } = useParams();
   const [project, setProject] = useState(null);
   const [error, setError] = useState(null);
+  const [show, setShow] = useState(false);
+  const [currentImage, setCurrentImage] = useState('');
 
   useEffect(() => {
     const fetchProjectDetails = async () => {
@@ -21,9 +23,7 @@ export const ProjectDetails = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        // console.log('Project data:', data); // Debug: print the fetched data
 
-        // Parse techStack if it's a JSON string
         if (typeof data.techStack === 'string') {
           try {
             data.techStack = JSON.parse(data.techStack);
@@ -32,7 +32,6 @@ export const ProjectDetails = () => {
           }
         }
 
-        // Parse demoImages if it's a JSON string
         if (typeof data.demoImages === 'string') {
           try {
             data.demoImages = JSON.parse(data.demoImages);
@@ -41,7 +40,6 @@ export const ProjectDetails = () => {
           }
         }
 
-        // Parse outcome if it's a JSON string
         if (typeof data.outcome === 'string') {
           try {
             data.outcome = JSON.parse(data.outcome);
@@ -68,13 +66,18 @@ export const ProjectDetails = () => {
     return <p>Loading...</p>;
   }
 
-  const renderTechStack = (techStack) => {
+  const handleShow = (imgUrl) => {
+    setCurrentImage(imgUrl);
+    setShow(true);
+  };
 
+  const handleClose = () => setShow(false);
+
+  const renderTechStack = (techStack) => {
     if (techStack && typeof techStack === 'object' && !Array.isArray(techStack)) {
       return (
         <Row>
           {Object.entries(techStack).map(([category, technologies], index) => {
-            // Ensure technologies is an array
             const techList = Array.isArray(technologies) ? technologies : [technologies];
             return (
               <Col key={index} md={4} className="mb-4">
@@ -96,14 +99,14 @@ export const ProjectDetails = () => {
         </Row>
       );
     } else {
-      console.log('Invalid techStack format'); // Debug: log invalid format
+      console.log('Invalid techStack format');
       return null;
     }
   };
 
   const renderCarousel = (images) => {
     if (!Array.isArray(images)) {
-      console.log('Invalid images format'); // Debug: log invalid format
+      console.log('Invalid images format');
       return null;
     }
 
@@ -111,7 +114,13 @@ export const ProjectDetails = () => {
       <Carousel>
         {images.map((imgUrl, index) => (
           <Carousel.Item key={index}>
-            <img className="d-block carousel-img" src={imgUrl} alt={`demo images ${index + 1}`} />
+            <img
+              className="d-block w-100 carousel-img"
+              src={imgUrl}
+              alt={`demo image ${index + 1}`}
+              onClick={() => handleShow(imgUrl)}
+              style={{ cursor: 'pointer' }}
+            />
           </Carousel.Item>
         ))}
       </Carousel>
@@ -119,9 +128,8 @@ export const ProjectDetails = () => {
   };
 
   const renderOutcome = (outcome) => {
-
     if (!Array.isArray(outcome)) {
-      console.log('Invalid outcome format'); // Debug: log invalid format
+      console.log('Invalid outcome format');
       return null;
     }
 
@@ -194,6 +202,15 @@ export const ProjectDetails = () => {
           </Row>
         )}
       </Container>
+
+      <Modal show={show} onHide={handleClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title style={{ color: 'black' }}>Image Preview</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="d-flex justify-content-center align-items-center">
+          <img src={currentImage} alt="Preview" className="img-fluid" style={{ maxWidth: '100%', maxHeight: '100%' }} />
+        </Modal.Body>
+      </Modal>
     </section>
   );
 };

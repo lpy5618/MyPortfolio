@@ -517,6 +517,13 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
   object-fit: contain;
 }
 
+@media (min-width: 576px) {
+  .modal-dialog {
+    max-width: 40% !important;
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
 
 /*Contact CSS*/
 .contact {
