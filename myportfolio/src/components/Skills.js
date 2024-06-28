@@ -31,11 +31,11 @@ export const Skills = () => {
         },
         {
             title: 'AI Development',
-            skills: ['Machine Learning', 'Deep Learning', 'Computer Vision', 'Image Processing']
+            skills: ['Machine Learning', 'Deep Learning', 'Computer Vision', 'Image Processing','Semantic Segmentation']
         },
         {
             title: 'Frameworks & Libraries',
-            skills: ['TensorFlow', 'OpenCV', 'Scikit-Learn', 'Pandas', 'Numpy', 'React', 'Vue']
+            skills: ['React', 'Vue','TensorFlow', 'OpenCV', 'Scikit-Learn', 'Pandas', 'Numpy', 'Matplotlib']
         },
         {
             title: 'Cloud Platforms',
@@ -43,11 +43,11 @@ export const Skills = () => {
         },
         {
             title: 'Databases',
-            skills: ['MySQL', 'MongoDB']
+            skills: ['MySQL', 'MS SQL Server', 'MongoDB','GraphQL']
         },
         {
             title: 'Tools',
-            skills: ['Git / GitHub', 'BitBucket', 'Jira / Trello', 'Postman', 'Anaconda', 'Jupyter Notebook', 'Visual Studio Code']
+            skills: ['Git / GitHub', 'BitBucket', 'Jira / Trello','Confluence', 'Postman', 'Anaconda', 'Jupyter Notebook', 'Visual Studio Code','Tableau','ArcGIS']
         }
     ]
 
