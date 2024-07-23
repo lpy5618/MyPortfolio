@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Nav from 'react-bootstrap/Nav';
 import Tab from 'react-bootstrap/Tab';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 import { ProjectCard } from './ProjectCard';
 import colorSharp2 from '../assets/img/color-sharp2.png';
 
@@ -10,20 +10,24 @@ export const Projects = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchProjects = async () => {
-            try {
-                const response = await fetch('https://cienunkpi2.execute-api.ap-southeast-2.amazonaws.com/default/projects', { method: 'GET' });
-                const data = await response.json();
-                setProjects(data);
-            } catch (error) {
-                setError('Error fetching projects');
-                console.error('Error fetching projects:', error);
-            } finally {
-                setLoading(false);
+    const fetchProjects = async () => {
+        try {
+            const response = await fetch('https://cienunkpi2.execute-api.ap-southeast-2.amazonaws.com/default/projects', { method: 'GET' });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        };
+            const data = await response.json();
+            const sortedProjects = data.sort((a, b) => a.id - b.id);
+            setProjects(sortedProjects);
+        } catch (error) {
+            setError(`Error fetching projects: ${error.message}`);
+            console.error('Error fetching projects:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchProjects();
     }, []);
 
@@ -41,7 +45,12 @@ export const Projects = () => {
     }
 
     if (error) {
-        return <div>{error}</div>;
+        return (
+            <div>
+                <p>{error}</p>
+                <Button onClick={fetchProjects}>Retry</Button>
+            </div>
+        );
     }
 
     return (
