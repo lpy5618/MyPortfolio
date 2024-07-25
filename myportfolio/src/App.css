@@ -520,6 +520,18 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
   object-fit: contain;
 }
 
+.project-details .links-button {
+  background: #fff;
+  color: #000;
+  font-weight: 700;
+  padding: 14px 48px;
+  font-size: 18px;
+  margin-top: 25px;
+  border-radius: 1;
+  position: relative;
+  transition: 0.3s ease-in-out;
+}
+
 @media (min-width: 576px) {
   .modal-dialog {
     max-width: 40% !important;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Carousel, Modal } from 'react-bootstrap';
+import { Container, Row, Col, Card, Carousel, Modal, Button } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 
 export const ProjectDetails = () => {
@@ -148,6 +148,32 @@ export const ProjectDetails = () => {
     );
   };
 
+  const renderLinks = (githubLink, demoLink) => {
+    if (!githubLink && !demoLink) {
+      return null;
+    }
+
+    return (
+      <Row className="mt-4">
+        <Col>
+          <h3>Links</h3>
+          <div className="d-flex justify-content-start ">
+            {githubLink && (
+              <Button variant="primary" href={githubLink} target="_blank" className="me-2 links-button">
+                GitHub
+              </Button>
+            )}
+            {demoLink && (
+              <Button variant="secondary" href={demoLink} target="_blank" className='links-button'>
+                Demo
+              </Button>
+            )}
+          </div>
+        </Col>
+      </Row>
+    );
+  };
+
   return (
     <section className="project-details" id="project-details">
       <Container>
@@ -201,6 +227,7 @@ export const ProjectDetails = () => {
             </Col>
           </Row>
         )}
+        {renderLinks(project.githubLink, project.demoLink)}
       </Container>
 
       <Modal show={show} onHide={handleClose} centered>
