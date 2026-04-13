@@ -1,0 +1,35 @@
+name: Keep MongoDB Alive
+
+on:
+  schedule:
+    - cron: "0 0 * * 0"  # 每周一次
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install MongoDB driver
+        run: npm install mongodb
+
+      - name: Ping MongoDB
+        run: |
+          node -e "
+          const { MongoClient } = require('mongodb');
+          const client = new MongoClient(process.env.MONGODB_URI);
+          async function run() {
+            await client.connect();
+            await client.db('admin').command({ ping: 1 });
+            console.log('✅ MongoDB is alive');
+            await client.close();
+          }
+          run();
+          "
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
