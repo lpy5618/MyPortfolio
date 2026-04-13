@@ -32,12 +32,30 @@ export const Projects = () => {
     }, []);
 
     const projectChunks = useMemo(() => {
-        const chunkSize = Math.ceil(projects.length / 3);
-        return [
-            projects.slice(0, chunkSize),
-            projects.slice(chunkSize, 2 * chunkSize),
-            projects.slice(2 * chunkSize)
-        ];
+        const itemsPerPage = 6;
+        const totalPages = 3;
+        const totalProjects = projects.length;
+        
+        // 计算每页应该显示的项目数，尽量平均分配
+        const baseItemsPerPage = Math.floor(totalProjects / totalPages);
+        const remainder = totalProjects % totalPages;
+        
+        const chunks = [];
+        let currentIndex = 0;
+        
+        for (let i = 0; i < totalPages; i++) {
+            // 前 remainder 页多分配一个项目
+            const pageSize = Math.min(baseItemsPerPage + (i < remainder ? 1 : 0), itemsPerPage);
+            const pageProjects = projects.slice(currentIndex, currentIndex + pageSize);
+            
+            if (pageProjects.length > 0) {
+                chunks.push(pageProjects);
+            }
+            
+            currentIndex += pageSize;
+        }
+        
+        return chunks;
     }, [projects]);
 
     if (loading) {

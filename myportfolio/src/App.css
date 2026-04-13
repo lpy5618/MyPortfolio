@@ -303,6 +303,12 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
 .txt-rotate > .wrap {
   border-right: 0.08em solid #666;
 }
+.banner h1 .wrap {
+  display: inline-block;
+  min-width: 300px;
+  min-height: 1.2em;
+  vertical-align: bottom;
+}
 
 /*Skills CSS*/
 .skill {
@@ -586,9 +592,10 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
   padding: 14px 48px;
   font-size: 18px;
   margin-top: 25px;
-  border-radius: 0;
+  border-radius: 20px;
   position: relative;
   transition: 0.3s ease-in-out;
+  overflow: hidden;
 }
 .contact form button span {
   z-index: 1;
@@ -607,8 +614,146 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
   left: 0;
   z-index: 0;
   transition: 0.3s ease-in-out;
+  border-radius: 20px;
 }
 .contact form button:hover::before {
+  width: 100%;
+}
+
+/*Add Project CSS*/
+.add-project {
+  padding-top: 150px;
+  min-height: 100vh;
+}
+.add-project h5 {
+  color: #fff;
+  margin-bottom: 10px;
+  text-align: left;
+}
+.add-project .tech-stack-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px 15px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  color: #fff;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.add-project ul {
+  list-style: none;
+  text-align: left;
+  padding-left: 0;
+}
+.add-project ul li {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px 15px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  word-break: break-word;
+}
+.add-project .btn-add {
+  font-weight: 600;
+  padding: 18px 26px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #121212;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  transition: 0.3s ease-in-out;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  font-size: 18px;
+  letter-spacing: 0.8px;
+  margin: 0;
+}
+.add-project .btn-add span {
+  position: relative;
+  z-index: 2;
+}
+.add-project .btn-add::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90.21deg, #AA367C -5.91%, #4A2FBD 111.58%);
+  transition: 0.3s ease-in-out;
+  z-index: 1;
+}
+.add-project .btn-add:hover {
+  color: #fff;
+}
+.add-project .btn-add:hover::before {
+  width: 100%;
+}
+.add-project .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+.add-project .px-1 {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.add-project .btn-remove {
+  font-weight: 500;
+  padding: 5px 15px;
+  font-size: 14px;
+  background: rgba(255, 77, 77, 0.8);
+  color: #fff;
+  border: 1px solid rgba(255, 77, 77, 0.5);
+  border-radius: 8px;
+  transition: 0.3s ease-in-out;
+  margin-left: 10px;
+  flex-shrink: 0;
+}
+.add-project .btn-remove:hover {
+  background: rgba(255, 77, 77, 1);
+  transform: scale(1.05);
+}
+.add-project .button-group {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-top: 25px;
+}
+.add-project .btn-cancel {
+  font-weight: 700;
+  color: #fff;
+  background-color: transparent;
+  border: 2px solid #fff;
+  padding: 14px 48px;
+  font-size: 18px;
+  border-radius: 20px;
+  position: relative;
+  transition: 0.3s ease-in-out;
+  overflow: hidden;
+}
+.add-project .btn-cancel span {
+  position: relative;
+  z-index: 1;
+}
+.add-project .btn-cancel::before {
+  content: "";
+  background: #fff;
+  width: 0;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  transition: 0.3s ease-in-out;
+}
+.add-project .btn-cancel:hover {
+  color: #121212;
+}
+.add-project .btn-cancel:hover::before {
   width: 100%;
 }
 

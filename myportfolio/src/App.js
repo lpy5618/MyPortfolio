@@ -8,6 +8,7 @@ import { Footer } from './components/Footer';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { ProjectDetails } from './components/ProjectDetails';
+import { AddProject } from './components/AddProject';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Routes>
           <Route path="/" element={<><Banner /><Skills /><Projects /><Contact /></>} />
           <Route path="/project/:id" element={<ProjectDetails />} />
+          <Route path="/add-project" element={<AddProject />} />
         </Routes>
         <Footer />
       </div>

@@ -25,8 +25,23 @@ export const NavBar = () => {
 
   const onUpdateActiveLink = (link) => {
     setActiveLink(link);
-    if (link === 'home') {
+    
+    // 如果在其他页面，先导航回首页
+    if (window.location.pathname !== '/') {
       navigate('/');
+      // 等待导航完成后再滚动
+      setTimeout(() => {
+        const element = document.getElementById(link);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    } else {
+      // 如果已经在首页，直接滚动
+      const element = document.getElementById(link);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   };
 
@@ -57,6 +72,7 @@ export const NavBar = () => {
             <Nav.Link className={activeLink === 'skills' ? 'active navbar-link' : 'navbar-link'} onClick={() => onUpdateActiveLink('skills')}>Skills</Nav.Link>
             <Nav.Link className={activeLink === 'project' ? 'active navbar-link' : 'navbar-link'} onClick={() => onUpdateActiveLink('project')}>Projects</Nav.Link>
             <Nav.Link className={activeLink === 'resume' ? 'active navbar-link' : 'navbar-link'} onClick={handleResumeClick}>Resume</Nav.Link>
+            <Nav.Link className={activeLink === 'add-project' ? 'active navbar-link' : 'navbar-link'} onClick={() => { setActiveLink('add-project'); navigate('/add-project'); }}>Add Project</Nav.Link>
           </Nav>
           <span className='navbar-text'>
             <div className='social-icon'>
