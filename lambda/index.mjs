@@ -1,5 +1,7 @@
 import nodemailer from 'nodemailer';
 import { MongoClient } from 'mongodb';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -14,6 +16,15 @@ const contactEmail = nodemailer.createTransport({
 
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
+
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION || 'ap-southeast-2',
+  requestChecksumCalculation: 'WHEN_REQUIRED',
+  responseChecksumValidation: 'WHEN_REQUIRED',
+});
+const S3_BUCKET = process.env.S3_BUCKET || 'myportfolio-jeff';
+const S3_PREFIX = 'projectImages/';
+const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'https://io.jeffli.xyz/projectImages/';
 
 export const handler = async (event) => {
   console.log('Event: ', event);
@@ -37,7 +48,46 @@ export const handler = async (event) => {
   if (httpMethod === 'POST') {
     const body = JSON.parse(event.body);
 
-    if (path.includes('portfolioSendEmail')) {
+    if (path.includes('upload')) {
+      // Generate presigned URL for S3 upload
+      try {
+        const { fileName, contentType } = body;
+
+        if (!fileName || !contentType) {
+          return {
+            statusCode: 400,
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ error: 'fileName and contentType are required' }),
+          };
+        }
+
+        const key = `${S3_PREFIX}${fileName}`;
+        const command = new PutObjectCommand({
+          Bucket: S3_BUCKET,
+          Key: key,
+          ContentType: contentType,
+        });
+
+        const presignedUrl = await getSignedUrl(s3Client, command, {
+          expiresIn: 300,
+          unhoistableHeaders: new Set(['x-amz-checksum-crc32']),
+        });
+        const publicUrl = `${PUBLIC_BASE_URL}${fileName}`;
+
+        return {
+          statusCode: 200,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ presignedUrl, publicUrl }),
+        };
+      } catch (error) {
+        console.error(error);
+        return {
+          statusCode: 500,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ error: 'Failed to generate upload URL' }),
+        };
+      }
+    } else if (path.includes('portfolioSendEmail')) {
       // Handle contact form submission
       try {
         const name = `${body.firstName} ${body.lastName}`;
