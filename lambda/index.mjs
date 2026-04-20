@@ -133,14 +133,10 @@ export const handler = async (event) => {
         const database = client.db('myPortfolio');
         const projects = database.collection('projects');
 
-        const existingProject = await projects.findOne({ id: body.id });
-        if (existingProject) {
-          return {
-            statusCode: 400,
-            headers: { 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ error: 'Project with this ID already exists' }),
-          };
-        }
+        // 自动生成ID：取当前最大ID + 1
+        const lastProject = await projects.find({}).sort({ id: -1 }).limit(1).toArray();
+        const newId = lastProject.length > 0 ? lastProject[0].id + 1 : 1;
+        body.id = newId;
 
         const result = await projects.insertOne(body);
 
@@ -171,25 +167,33 @@ export const handler = async (event) => {
       const projects = database.collection('projects');
 
       const pathParams = event.pathParameters;
-      if (pathParams && pathParams.id) {
-        const projectId = pathParams.id;
-        console.log('Project ID: ', projectId);
-        const project = await projects.findOne({ id: parseInt(projectId) });
+      // 支持从 pathParameters 或 rawPath 中提取项目ID
+      const projectId = pathParams?.id || pathParams?.proxy;
+      if (!projectId) {
+        // 尝试从 rawPath 中提取: /projects/11 -> 11
+        const rawPath = event.rawPath || event.path || '';
+        const match = rawPath.match(/\/projects\/(\d+)/);
+        if (match) {
+          const id = match[1];
+          console.log('Project ID from rawPath: ', id);
+          const project = await projects.findOne({ id: parseInt(id) });
 
-        if (!project) {
+          if (!project) {
+            return {
+              statusCode: 404,
+              headers: { 'Access-Control-Allow-Origin': '*' },
+              body: JSON.stringify({ error: 'Project not found' }),
+            };
+          }
+
           return {
-            statusCode: 404,
+            statusCode: 200,
             headers: { 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ error: 'Project not found' }),
+            body: JSON.stringify(project),
           };
         }
 
-        return {
-          statusCode: 200,
-          headers: { 'Access-Control-Allow-Origin': '*' },
-          body: JSON.stringify(project),
-        };
-      } else {
+        // 没有ID参数，返回所有项目
         const allProjects = await projects.find({}).toArray();
         return {
           statusCode: 200,
@@ -197,6 +201,23 @@ export const handler = async (event) => {
           body: JSON.stringify(allProjects),
         };
       }
+
+      console.log('Project ID: ', projectId);
+      const project = await projects.findOne({ id: parseInt(projectId) });
+
+      if (!project) {
+        return {
+          statusCode: 404,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ error: 'Project not found' }),
+        };
+      }
+
+      return {
+        statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify(project),
+      };
     } catch (error) {
       console.error(error);
       return {

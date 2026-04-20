@@ -33,7 +33,6 @@ export const AddProject = () => {
     const [password, setPassword] = useState("");
     const [authError, setAuthError] = useState("");
     const [formDetails, setFormDetails] = useState({
-        id: "",
         title: "",
         description: "",
         imgUrl: "",
@@ -134,10 +133,7 @@ export const AddProject = () => {
         setButtonText("Adding...");
 
         try {
-            const projectData = {
-                ...formDetails,
-                id: parseInt(formDetails.id)
-            };
+            const projectData = { ...formDetails };
 
             const response = await fetch(`${API_BASE}/projects`, {
                 method: "POST",
@@ -218,16 +214,7 @@ export const AddProject = () => {
                         <h2>Add New Project</h2>
                         <Form onSubmit={handleSubmit}>
                             <Row>
-                                <Col sm={6} className="px-1">
-                                    <Form.Control
-                                        type="number"
-                                        value={formDetails.id}
-                                        onChange={(e) => setFormDetails({ ...formDetails, id: e.target.value })}
-                                        placeholder="Project ID"
-                                        required
-                                    />
-                                </Col>
-                                <Col sm={6} className="px-1">
+                                <Col sm={12} className="px-1">
                                     <Form.Control
                                         type="text"
                                         value={formDetails.title}

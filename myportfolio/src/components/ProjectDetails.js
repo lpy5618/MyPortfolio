@@ -84,7 +84,7 @@ export const ProjectDetails = () => {
                 <Card>
                   <Card.Body>
                     <Card.Title>{category}</Card.Title>
-                    <Card.Text>
+                    <Card.Text as="div">
                       <ul>
                         {techList.map((tech, i) => (
                           <li key={i}>{tech}</li>
@@ -136,7 +136,7 @@ export const ProjectDetails = () => {
     return (
       <Card className="mb-4">
         <Card.Body>
-          <Card.Text>
+          <Card.Text as="div">
             <ul>
               {outcome.map((item, index) => (
                 <li key={index}>{item}</li>
