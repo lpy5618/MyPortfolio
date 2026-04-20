@@ -1,6 +1,31 @@
 import { useState } from "react";
-import { Col, Container, Row, Button, Form } from "react-bootstrap";
+import { Col, Container, Row, Button, Form, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+
+const API_BASE = "https://cienunkpi2.execute-api.ap-southeast-2.amazonaws.com/default";
+
+const uploadImage = async (file) => {
+    // 1. 获取 presigned URL
+    const res = await fetch(`${API_BASE}/upload`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            fileName: `${Date.now()}-${file.name}`,
+            contentType: file.type,
+        }),
+    });
+    if (!res.ok) throw new Error("Failed to get upload URL");
+    const { presignedUrl, publicUrl } = await res.json();
+
+    // 2. 上传文件到 S3
+    const uploadRes = await fetch(presignedUrl, {
+        method: "PUT",
+        body: file,
+    });
+    if (!uploadRes.ok) throw new Error("Failed to upload image");
+
+    return publicUrl;
+};
 
 export const AddProject = () => {
     const navigate = useNavigate();
@@ -17,12 +42,45 @@ export const AddProject = () => {
     });
     const [buttonText, setButtonText] = useState("Add Project");
     const [status, setStatus] = useState({});
-    
+    const [coverUploading, setCoverUploading] = useState(false);
+    const [demoUploading, setDemoUploading] = useState(false);
+
     // 临时输入字段
     const [techCategory, setTechCategory] = useState("");
     const [techItems, setTechItems] = useState("");
     const [outcomeInput, setOutcomeInput] = useState("");
-    const [demoImageInput, setDemoImageInput] = useState("");
+
+    const handleCoverUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setCoverUploading(true);
+        try {
+            const url = await uploadImage(file);
+            setFormDetails({ ...formDetails, imgUrl: url });
+        } catch (err) {
+            setStatus({ success: false, message: `Cover upload failed: ${err.message}` });
+        } finally {
+            setCoverUploading(false);
+        }
+    };
+
+    const handleDemoImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setDemoUploading(true);
+        try {
+            const url = await uploadImage(file);
+            setFormDetails(prev => ({
+                ...prev,
+                demoImages: [...prev.demoImages, url]
+            }));
+        } catch (err) {
+            setStatus({ success: false, message: `Demo image upload failed: ${err.message}` });
+        } finally {
+            setDemoUploading(false);
+            e.target.value = "";
+        }
+    };
 
     const handleAddTechStack = () => {
         if (techCategory && techItems) {
@@ -61,16 +119,6 @@ export const AddProject = () => {
         });
     };
 
-    const handleAddDemoImage = () => {
-        if (demoImageInput) {
-            setFormDetails({
-                ...formDetails,
-                demoImages: [...formDetails.demoImages, demoImageInput]
-            });
-            setDemoImageInput("");
-        }
-    };
-
     const handleRemoveDemoImage = (index) => {
         setFormDetails({
             ...formDetails,
@@ -81,26 +129,21 @@ export const AddProject = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setButtonText("Adding...");
-        
+
         try {
             const projectData = {
                 ...formDetails,
                 id: parseInt(formDetails.id)
             };
 
-            const response = await fetch(
-                "https://cienunkpi2.execute-api.ap-southeast-2.amazonaws.com/default/projects",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json;charset=utf-8",
-                    },
-                    body: JSON.stringify(projectData),
-                }
-            );
-            
+            const response = await fetch(`${API_BASE}/projects`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json;charset=utf-8" },
+                body: JSON.stringify(projectData),
+            });
+
             const data = await response.json();
-            
+
             if (response.ok) {
                 setStatus({ success: true, message: "Project added successfully!" });
                 setTimeout(() => navigate('/'), 2000);
@@ -108,10 +151,7 @@ export const AddProject = () => {
                 setStatus({ success: false, message: data.error || "Failed to add project" });
             }
         } catch (error) {
-            setStatus({
-                success: false,
-                message: "Something went wrong, please try again later.",
-            });
+            setStatus({ success: false, message: "Something went wrong, please try again later." });
         } finally {
             setButtonText("Add Project");
         }
@@ -152,15 +192,38 @@ export const AddProject = () => {
                                         required
                                     />
                                 </Col>
-                                <Col sm={12} className="px-1">
-                                    <Form.Control
-                                        type="url"
-                                        value={formDetails.imgUrl}
-                                        onChange={(e) => setFormDetails({ ...formDetails, imgUrl: e.target.value })}
-                                        placeholder="Image URL"
-                                        required
-                                    />
+
+                                {/* Cover Image Upload */}
+                                <Col sm={12} className="px-1 mt-3">
+                                    <h5>Cover Image</h5>
+                                    <div className="upload-area">
+                                        <label className="upload-label" htmlFor="cover-upload">
+                                            {coverUploading ? (
+                                                <><Spinner animation="border" size="sm" /> Uploading...</>
+                                            ) : formDetails.imgUrl ? (
+                                                <img src={formDetails.imgUrl} alt="Cover preview" className="upload-preview" />
+                                            ) : (
+                                                <span>Click to select cover image</span>
+                                            )}
+                                        </label>
+                                        <input
+                                            id="cover-upload"
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleCoverUpload}
+                                            hidden
+                                        />
+                                        {formDetails.imgUrl && (
+                                            <Button
+                                                className="btn-remove mt-2"
+                                                onClick={() => setFormDetails({ ...formDetails, imgUrl: "" })}
+                                            >
+                                                Remove
+                                            </Button>
+                                        )}
+                                    </div>
                                 </Col>
+
                                 <Col sm={12} className="px-1">
                                     <Form.Control
                                         as="textarea"
@@ -171,7 +234,7 @@ export const AddProject = () => {
                                         required
                                     />
                                 </Col>
-                                
+
                                 {/* Tech Stack Section */}
                                 <Col sm={12} className="px-1 mt-3">
                                     <h5>Tech Stack</h5>
@@ -200,12 +263,7 @@ export const AddProject = () => {
                                         {Object.entries(formDetails.techStack).map(([category, items]) => (
                                             <div key={category} className="tech-stack-item">
                                                 <span><strong>{category}:</strong> {items.join(', ')}</span>
-                                                <Button 
-                                                    className="btn-remove"
-                                                    onClick={() => handleRemoveTechStack(category)}
-                                                >
-                                                    Remove
-                                                </Button>
+                                                <Button className="btn-remove" onClick={() => handleRemoveTechStack(category)}>Remove</Button>
                                             </div>
                                         ))}
                                     </div>
@@ -231,46 +289,39 @@ export const AddProject = () => {
                                         {formDetails.outcome.map((item, index) => (
                                             <li key={index}>
                                                 <span>{item}</span>
-                                                <Button 
-                                                    className="btn-remove"
-                                                    onClick={() => handleRemoveOutcome(index)}
-                                                >
-                                                    Remove
-                                                </Button>
+                                                <Button className="btn-remove" onClick={() => handleRemoveOutcome(index)}>Remove</Button>
                                             </li>
                                         ))}
                                     </ul>
                                 </Col>
 
-                                {/* Demo Images Section */}
+                                {/* Demo Images Upload */}
                                 <Col sm={12} className="px-1 mt-3">
                                     <h5>Demo Images</h5>
-                                    <Row>
-                                        <Col sm={10} className="px-1">
-                                            <Form.Control
-                                                type="url"
-                                                value={demoImageInput}
-                                                onChange={(e) => setDemoImageInput(e.target.value)}
-                                                placeholder="Demo Image URL"
-                                            />
-                                        </Col>
-                                        <Col sm={2} className="px-1">
-                                            <Button onClick={handleAddDemoImage} className="btn-add"><span>Add</span></Button>
-                                        </Col>
-                                    </Row>
-                                    <ul className="mt-2">
+                                    <div className="upload-area">
+                                        <label className="upload-label" htmlFor="demo-upload">
+                                            {demoUploading ? (
+                                                <><Spinner animation="border" size="sm" /> Uploading...</>
+                                            ) : (
+                                                <span>Click to add a demo image</span>
+                                            )}
+                                        </label>
+                                        <input
+                                            id="demo-upload"
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleDemoImageUpload}
+                                            hidden
+                                        />
+                                    </div>
+                                    <div className="demo-images-grid mt-2">
                                         {formDetails.demoImages.map((img, index) => (
-                                            <li key={index}>
-                                                <span>{img}</span>
-                                                <Button 
-                                                    className="btn-remove"
-                                                    onClick={() => handleRemoveDemoImage(index)}
-                                                >
-                                                    Remove
-                                                </Button>
-                                            </li>
+                                            <div key={index} className="demo-image-item">
+                                                <img src={img} alt={`Demo ${index + 1}`} />
+                                                <Button className="btn-remove" onClick={() => handleRemoveDemoImage(index)}>Remove</Button>
+                                            </div>
                                         ))}
-                                    </ul>
+                                    </div>
                                 </Col>
 
                                 <Col sm={12} className="px-1 mt-3">
@@ -287,11 +338,7 @@ export const AddProject = () => {
                                 <Col className="mt-3">
                                     <div className="button-group">
                                         <button type="submit"><span>{buttonText}</span></button>
-                                        <button 
-                                            type="button"
-                                            className="btn-cancel"
-                                            onClick={() => navigate('/')}
-                                        >
+                                        <button type="button" className="btn-cancel" onClick={() => navigate('/')}>
                                             <span>Cancel</span>
                                         </button>
                                     </div>

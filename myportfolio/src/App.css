@@ -756,6 +756,54 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
 .add-project .btn-cancel:hover::before {
   width: 100%;
 }
+.add-project .upload-area {
+  text-align: center;
+  margin-bottom: 8px;
+}
+.add-project .upload-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 120px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  font-size: 16px;
+  padding: 15px;
+}
+.add-project .upload-label:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #fff;
+}
+.add-project .upload-preview {
+  max-height: 200px;
+  width: auto;
+  max-width: 100%;
+  border-radius: 10px;
+  object-fit: contain;
+}
+.add-project .demo-images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.add-project .demo-image-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+}
+.add-project .demo-image-item img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
 
 /*Footer CSS*/
 .footer {
