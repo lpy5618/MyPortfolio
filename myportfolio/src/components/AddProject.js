@@ -29,6 +29,9 @@ const uploadImage = async (file) => {
 
 export const AddProject = () => {
     const navigate = useNavigate();
+    const [authenticated, setAuthenticated] = useState(false);
+    const [password, setPassword] = useState("");
+    const [authError, setAuthError] = useState("");
     const [formDetails, setFormDetails] = useState({
         id: "",
         title: "",
@@ -156,6 +159,56 @@ export const AddProject = () => {
             setButtonText("Add Project");
         }
     };
+
+    const handleAuth = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await fetch(`${API_BASE}/auth`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password }),
+            });
+            const data = await res.json();
+            if (data.authenticated) {
+                setAuthenticated(true);
+                setAuthError("");
+            } else {
+                setAuthError("Incorrect password");
+            }
+        } catch {
+            setAuthError("Verification failed, please try again");
+        }
+    };
+
+    if (!authenticated) {
+        return (
+            <section className="contact add-project">
+                <Container>
+                    <Row className="justify-content-center">
+                        <Col md={5}>
+                            <h2>Admin Access</h2>
+                            <Form onSubmit={handleAuth}>
+                                <Form.Control
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Enter admin password"
+                                    autoFocus
+                                />
+                                <div className="button-group">
+                                    <button type="submit"><span>Verify</span></button>
+                                    <button type="button" className="btn-cancel" onClick={() => navigate('/')}>
+                                        <span>Back</span>
+                                    </button>
+                                </div>
+                                {authError && <p className="danger">{authError}</p>}
+                            </Form>
+                        </Col>
+                    </Row>
+                </Container>
+            </section>
+        );
+    }
 
     return (
         <section className="contact add-project">

@@ -2,9 +2,6 @@ import nodemailer from 'nodemailer';
 import { MongoClient } from 'mongodb';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const contactEmail = nodemailer.createTransport({
   service: 'gmail',
@@ -18,13 +15,13 @@ const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'ap-southeast-2',
+  region: process.env.AWS_REGION,
   requestChecksumCalculation: 'WHEN_REQUIRED',
   responseChecksumValidation: 'WHEN_REQUIRED',
 });
-const S3_BUCKET = process.env.S3_BUCKET || 'myportfolio-jeff';
+const S3_BUCKET = process.env.S3_BUCKET;
 const S3_PREFIX = 'projectImages/';
-const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'https://io.jeffli.xyz/projectImages/';
+const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL;
 
 export const handler = async (event) => {
   console.log('Event: ', event);
@@ -48,8 +45,21 @@ export const handler = async (event) => {
   if (httpMethod === 'POST') {
     const body = JSON.parse(event.body);
 
-    if (path.includes('upload')) {
-      // Generate presigned URL for S3 upload
+    if (path.includes('auth')) {
+      const adminPass = process.env.ADMIN_PASS || 'jeff2024admin';
+      if (body.password === adminPass) {
+        return {
+          statusCode: 200,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ authenticated: true }),
+        };
+      }
+      return {
+        statusCode: 401,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ authenticated: false, error: 'Incorrect password' }),
+      };
+    } else if (path.includes('upload')) {      // Generate presigned URL for S3 upload
       try {
         const { fileName, contentType } = body;
 
