@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Col, Container, Row, Button, Form, Spinner } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const API_BASE = "https://cienunkpi2.execute-api.ap-southeast-2.amazonaws.com/default";
 
 const uploadImage = async (file) => {
-    // 1. 获取 presigned URL
     const res = await fetch(`${API_BASE}/upload`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -17,7 +16,6 @@ const uploadImage = async (file) => {
     if (!res.ok) throw new Error("Failed to get upload URL");
     const { presignedUrl, publicUrl } = await res.json();
 
-    // 2. 上传文件到 S3
     const uploadRes = await fetch(presignedUrl, {
         method: "PUT",
         body: file,
@@ -27,11 +25,15 @@ const uploadImage = async (file) => {
     return publicUrl;
 };
 
-export const AddProject = () => {
+export const ProjectForm = ({ mode = "add" }) => {
     const navigate = useNavigate();
+    const { id } = useParams();
+    const isEdit = mode === "edit";
+
     const [authenticated, setAuthenticated] = useState(false);
     const [password, setPassword] = useState("");
     const [authError, setAuthError] = useState("");
+    const [loading, setLoading] = useState(isEdit);
     const [formDetails, setFormDetails] = useState({
         title: "",
         description: "",
@@ -42,15 +44,40 @@ export const AddProject = () => {
         demoImages: [],
         conclusion: ""
     });
-    const [buttonText, setButtonText] = useState("Add Project");
+    const [buttonText, setButtonText] = useState(isEdit ? "Update Project" : "Add Project");
     const [status, setStatus] = useState({});
     const [coverUploading, setCoverUploading] = useState(false);
     const [demoUploading, setDemoUploading] = useState(false);
-
-    // 临时输入字段
     const [techCategory, setTechCategory] = useState("");
     const [techItems, setTechItems] = useState("");
     const [outcomeInput, setOutcomeInput] = useState("");
+
+    useEffect(() => {
+        if (isEdit && id) {
+            const fetchProject = async () => {
+                try {
+                    const res = await fetch(`${API_BASE}/projects/${id}`);
+                    if (!res.ok) throw new Error("Project not found");
+                    const data = await res.json();
+                    setFormDetails({
+                        title: data.title || "",
+                        description: data.description || "",
+                        imgUrl: data.imgUrl || "",
+                        summary: data.summary || "",
+                        techStack: data.techStack || {},
+                        outcome: data.outcome || [],
+                        demoImages: data.demoImages || [],
+                        conclusion: data.conclusion || ""
+                    });
+                } catch (err) {
+                    setStatus({ success: false, message: err.message });
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchProject();
+        }
+    }, [isEdit, id]);
 
     const handleCoverUpload = async (e) => {
         const file = e.target.files[0];
@@ -58,7 +85,7 @@ export const AddProject = () => {
         setCoverUploading(true);
         try {
             const url = await uploadImage(file);
-            setFormDetails({ ...formDetails, imgUrl: url });
+            setFormDetails(prev => ({ ...prev, imgUrl: url }));
         } catch (err) {
             setStatus({ success: false, message: `Cover upload failed: ${err.message}` });
         } finally {
@@ -72,10 +99,7 @@ export const AddProject = () => {
         setDemoUploading(true);
         try {
             const url = await uploadImage(file);
-            setFormDetails(prev => ({
-                ...prev,
-                demoImages: [...prev.demoImages, url]
-            }));
+            setFormDetails(prev => ({ ...prev, demoImages: [...prev.demoImages, url] }));
         } catch (err) {
             setStatus({ success: false, message: `Demo image upload failed: ${err.message}` });
         } finally {
@@ -86,73 +110,62 @@ export const AddProject = () => {
 
     const handleAddTechStack = () => {
         if (techCategory && techItems) {
-            setFormDetails({
-                ...formDetails,
-                techStack: {
-                    ...formDetails.techStack,
-                    [techCategory]: techItems.split(',').map(item => item.trim())
-                }
-            });
+            setFormDetails(prev => ({
+                ...prev,
+                techStack: { ...prev.techStack, [techCategory]: techItems.split(',').map(s => s.trim()) }
+            }));
             setTechCategory("");
             setTechItems("");
         }
     };
 
     const handleRemoveTechStack = (category) => {
-        const newTechStack = { ...formDetails.techStack };
-        delete newTechStack[category];
-        setFormDetails({ ...formDetails, techStack: newTechStack });
+        const updated = { ...formDetails.techStack };
+        delete updated[category];
+        setFormDetails(prev => ({ ...prev, techStack: updated }));
     };
 
     const handleAddOutcome = () => {
         if (outcomeInput) {
-            setFormDetails({
-                ...formDetails,
-                outcome: [...formDetails.outcome, outcomeInput]
-            });
+            setFormDetails(prev => ({ ...prev, outcome: [...prev.outcome, outcomeInput] }));
             setOutcomeInput("");
         }
     };
 
     const handleRemoveOutcome = (index) => {
-        setFormDetails({
-            ...formDetails,
-            outcome: formDetails.outcome.filter((_, i) => i !== index)
-        });
+        setFormDetails(prev => ({ ...prev, outcome: prev.outcome.filter((_, i) => i !== index) }));
     };
 
     const handleRemoveDemoImage = (index) => {
-        setFormDetails({
-            ...formDetails,
-            demoImages: formDetails.demoImages.filter((_, i) => i !== index)
-        });
+        setFormDetails(prev => ({ ...prev, demoImages: prev.demoImages.filter((_, i) => i !== index) }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setButtonText("Adding...");
+        setButtonText(isEdit ? "Updating..." : "Adding...");
 
         try {
-            const projectData = { ...formDetails };
+            const url = isEdit ? `${API_BASE}/projects/${id}` : `${API_BASE}/projects`;
+            const method = isEdit ? "PUT" : "POST";
 
-            const response = await fetch(`${API_BASE}/projects`, {
-                method: "POST",
+            const response = await fetch(url, {
+                method,
                 headers: { "Content-Type": "application/json;charset=utf-8" },
-                body: JSON.stringify(projectData),
+                body: JSON.stringify(formDetails),
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                setStatus({ success: true, message: "Project added successfully!" });
-                setTimeout(() => navigate('/'), 2000);
+                setStatus({ success: true, message: isEdit ? "Project updated!" : "Project added!" });
+                setTimeout(() => navigate(isEdit ? '/admin' : '/'), 2000);
             } else {
-                setStatus({ success: false, message: data.error || "Failed to add project" });
+                setStatus({ success: false, message: data.error || "Operation failed" });
             }
         } catch (error) {
             setStatus({ success: false, message: "Something went wrong, please try again later." });
         } finally {
-            setButtonText("Add Project");
+            setButtonText(isEdit ? "Update Project" : "Add Project");
         }
     };
 
@@ -206,34 +219,35 @@ export const AddProject = () => {
         );
     }
 
+    if (loading) {
+        return (
+            <section className="contact add-project">
+                <Container className="text-center">
+                    <Spinner animation="border" /> Loading project...
+                </Container>
+            </section>
+        );
+    }
+
     return (
         <section className="contact add-project">
             <Container>
                 <Row className="justify-content-center">
                     <Col md={10}>
-                        <h2>Add New Project</h2>
+                        <h2>{isEdit ? "Edit Project" : "Add New Project"}</h2>
                         <Form onSubmit={handleSubmit}>
                             <Row>
                                 <Col sm={12} className="px-1">
-                                    <Form.Control
-                                        type="text"
-                                        value={formDetails.title}
+                                    <Form.Control type="text" value={formDetails.title}
                                         onChange={(e) => setFormDetails({ ...formDetails, title: e.target.value })}
-                                        placeholder="Project Title"
-                                        required
-                                    />
+                                        placeholder="Project Title" required />
                                 </Col>
                                 <Col sm={12} className="px-1">
-                                    <Form.Control
-                                        type="text"
-                                        value={formDetails.description}
+                                    <Form.Control type="text" value={formDetails.description}
                                         onChange={(e) => setFormDetails({ ...formDetails, description: e.target.value })}
-                                        placeholder="Short Description"
-                                        required
-                                    />
+                                        placeholder="Short Description" required />
                                 </Col>
 
-                                {/* Cover Image Upload */}
                                 <Col sm={12} className="px-1 mt-3">
                                     <h5>Cover Image</h5>
                                     <div className="upload-area">
@@ -246,96 +260,69 @@ export const AddProject = () => {
                                                 <span>Click to select cover image</span>
                                             )}
                                         </label>
-                                        <input
-                                            id="cover-upload"
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleCoverUpload}
-                                            hidden
-                                        />
+                                        <input id="cover-upload" type="file" accept="image/*" onChange={handleCoverUpload} hidden />
                                         {formDetails.imgUrl && (
-                                            <Button
-                                                className="btn-remove mt-2"
-                                                onClick={() => setFormDetails({ ...formDetails, imgUrl: "" })}
-                                            >
-                                                Remove
-                                            </Button>
+                                            <Button className="btn-remove mt-2"
+                                                onClick={() => setFormDetails({ ...formDetails, imgUrl: "" })}>Remove</Button>
                                         )}
                                     </div>
                                 </Col>
 
                                 <Col sm={12} className="px-1">
-                                    <Form.Control
-                                        as="textarea"
-                                        rows={3}
-                                        value={formDetails.summary}
+                                    <Form.Control as="textarea" rows={3} value={formDetails.summary}
                                         onChange={(e) => setFormDetails({ ...formDetails, summary: e.target.value })}
-                                        placeholder="Project Summary"
-                                        required
-                                    />
+                                        placeholder="Project Summary" required />
                                 </Col>
 
-                                {/* Tech Stack Section */}
                                 <Col sm={12} className="px-1 mt-3">
                                     <h5>Tech Stack</h5>
                                     <Row>
                                         <Col sm={4} className="px-1">
-                                            <Form.Control
-                                                type="text"
-                                                value={techCategory}
+                                            <Form.Control type="text" value={techCategory}
                                                 onChange={(e) => setTechCategory(e.target.value)}
-                                                placeholder="Category (e.g., Frontend)"
-                                            />
+                                                placeholder="Category (e.g., Frontend)" />
                                         </Col>
                                         <Col sm={6} className="px-1">
-                                            <Form.Control
-                                                type="text"
-                                                value={techItems}
+                                            <Form.Control type="text" value={techItems}
                                                 onChange={(e) => setTechItems(e.target.value)}
-                                                placeholder="Technologies (comma-separated)"
-                                            />
+                                                placeholder="Technologies (comma-separated)" />
                                         </Col>
                                         <Col sm={2} className="px-1">
                                             <Button onClick={handleAddTechStack} className="btn-add"><span>Add</span></Button>
                                         </Col>
                                     </Row>
                                     <div className="mt-2">
-                                        {Object.entries(formDetails.techStack).map(([category, items]) => (
-                                            <div key={category} className="tech-stack-item">
-                                                <span><strong>{category}:</strong> {items.join(', ')}</span>
-                                                <Button className="btn-remove" onClick={() => handleRemoveTechStack(category)}>Remove</Button>
+                                        {Object.entries(formDetails.techStack).map(([cat, items]) => (
+                                            <div key={cat} className="tech-stack-item">
+                                                <span><strong>{cat}:</strong> {items.join(', ')}</span>
+                                                <Button className="btn-remove" onClick={() => handleRemoveTechStack(cat)}>Remove</Button>
                                             </div>
                                         ))}
                                     </div>
                                 </Col>
 
-                                {/* Outcomes Section */}
                                 <Col sm={12} className="px-1 mt-3">
                                     <h5>Outcomes</h5>
                                     <Row>
                                         <Col sm={10} className="px-1">
-                                            <Form.Control
-                                                type="text"
-                                                value={outcomeInput}
+                                            <Form.Control type="text" value={outcomeInput}
                                                 onChange={(e) => setOutcomeInput(e.target.value)}
-                                                placeholder="Add an outcome"
-                                            />
+                                                placeholder="Add an outcome" />
                                         </Col>
                                         <Col sm={2} className="px-1">
                                             <Button onClick={handleAddOutcome} className="btn-add"><span>Add</span></Button>
                                         </Col>
                                     </Row>
                                     <ul className="mt-2">
-                                        {formDetails.outcome.map((item, index) => (
-                                            <li key={index}>
+                                        {formDetails.outcome.map((item, i) => (
+                                            <li key={i}>
                                                 <span>{item}</span>
-                                                <Button className="btn-remove" onClick={() => handleRemoveOutcome(index)}>Remove</Button>
+                                                <Button className="btn-remove" onClick={() => handleRemoveOutcome(i)}>Remove</Button>
                                             </li>
                                         ))}
                                     </ul>
                                 </Col>
 
-                                {/* Demo Images Upload */}
                                 <Col sm={12} className="px-1 mt-3">
                                     <h5>Demo Images</h5>
                                     <div className="upload-area">
@@ -346,39 +333,29 @@ export const AddProject = () => {
                                                 <span>Click to add a demo image</span>
                                             )}
                                         </label>
-                                        <input
-                                            id="demo-upload"
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleDemoImageUpload}
-                                            hidden
-                                        />
+                                        <input id="demo-upload" type="file" accept="image/*" onChange={handleDemoImageUpload} hidden />
                                     </div>
                                     <div className="demo-images-grid mt-2">
-                                        {formDetails.demoImages.map((img, index) => (
-                                            <div key={index} className="demo-image-item">
-                                                <img src={img} alt={`Demo ${index + 1}`} />
-                                                <Button className="btn-remove" onClick={() => handleRemoveDemoImage(index)}>Remove</Button>
+                                        {formDetails.demoImages.map((img, i) => (
+                                            <div key={i} className="demo-image-item">
+                                                <img src={img} alt={`Demo ${i + 1}`} />
+                                                <Button className="btn-remove" onClick={() => handleRemoveDemoImage(i)}>Remove</Button>
                                             </div>
                                         ))}
                                     </div>
                                 </Col>
 
                                 <Col sm={12} className="px-1 mt-3">
-                                    <Form.Control
-                                        as="textarea"
-                                        rows={3}
-                                        value={formDetails.conclusion}
+                                    <Form.Control as="textarea" rows={3} value={formDetails.conclusion}
                                         onChange={(e) => setFormDetails({ ...formDetails, conclusion: e.target.value })}
-                                        placeholder="Conclusion"
-                                        required
-                                    />
+                                        placeholder="Conclusion" required />
                                 </Col>
 
                                 <Col className="mt-3">
                                     <div className="button-group">
                                         <button type="submit"><span>{buttonText}</span></button>
-                                        <button type="button" className="btn-cancel" onClick={() => navigate('/')}>
+                                        <button type="button" className="btn-cancel"
+                                            onClick={() => navigate(isEdit ? '/admin' : '/')}>
                                             <span>Cancel</span>
                                         </button>
                                     </div>

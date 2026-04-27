@@ -36,7 +36,7 @@ export const handler = async (event) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST,OPTIONS,GET',
+        'Access-Control-Allow-Methods': 'POST,OPTIONS,GET,PUT,DELETE',
       },
       body: '',
     };
@@ -96,6 +96,34 @@ export const handler = async (event) => {
           headers: { 'Access-Control-Allow-Origin': '*' },
           body: JSON.stringify({ error: 'Failed to generate upload URL' }),
         };
+      }
+    } else if (path.includes('reorder')) {
+      // Handle project reorder
+      try {
+        await client.connect();
+        const database = client.db('myPortfolio');
+        const projects = database.collection('projects');
+
+        // body.order = [{ id: 1, order: 0 }, { id: 2, order: 1 }, ...]
+        const updates = body.order.map(item =>
+          projects.updateOne({ id: item.id }, { $set: { order: item.order } })
+        );
+        await Promise.all(updates);
+
+        return {
+          statusCode: 200,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ message: 'Order updated successfully' }),
+        };
+      } catch (error) {
+        console.error(error);
+        return {
+          statusCode: 500,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ error: 'Failed to update order' }),
+        };
+      } finally {
+        await client.close();
       }
     } else if (path.includes('portfolioSendEmail')) {
       // Handle contact form submission
@@ -224,6 +252,100 @@ export const handler = async (event) => {
         statusCode: 500,
         headers: { 'Access-Control-Allow-Origin': '*' },
         body: JSON.stringify({ error: 'Failed to fetch projects' }),
+      };
+    } finally {
+      await client.close();
+    }
+  } else if (httpMethod === 'PUT' && path.includes('projects')) {
+    // Handle project update
+    try {
+      await client.connect();
+      const database = client.db('myPortfolio');
+      const projects = database.collection('projects');
+      const body = JSON.parse(event.body);
+
+      // Extract project ID from path or body
+      const rawPath = event.rawPath || event.path || '';
+      const match = rawPath.match(/\/projects\/(\d+)/);
+      const projectId = event.pathParameters?.id || (match && match[1]) || body.id;
+
+      if (!projectId) {
+        return {
+          statusCode: 400,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ error: 'Project ID is required' }),
+        };
+      }
+
+      const { _id, ...updateData } = body;
+      const result = await projects.updateOne(
+        { id: parseInt(projectId) },
+        { $set: updateData }
+      );
+
+      if (result.matchedCount === 0) {
+        return {
+          statusCode: 404,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ error: 'Project not found' }),
+        };
+      }
+
+      return {
+        statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ message: 'Project updated successfully' }),
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        statusCode: 500,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'Failed to update project' }),
+      };
+    } finally {
+      await client.close();
+    }
+  } else if (httpMethod === 'DELETE' && path.includes('projects')) {
+    // Handle project deletion
+    try {
+      await client.connect();
+      const database = client.db('myPortfolio');
+      const projects = database.collection('projects');
+
+      const rawPath = event.rawPath || event.path || '';
+      const match = rawPath.match(/\/projects\/(\d+)/);
+      const projectId = event.pathParameters?.id || (match && match[1]);
+
+      if (!projectId) {
+        return {
+          statusCode: 400,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ error: 'Project ID is required' }),
+        };
+      }
+
+      const result = await projects.deleteOne({ id: parseInt(projectId) });
+
+      if (result.deletedCount === 0) {
+        return {
+          statusCode: 404,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ error: 'Project not found' }),
+        };
+      }
+
+      return {
+        statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ message: 'Project deleted successfully' }),
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        statusCode: 500,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'Failed to delete project' }),
       };
     } finally {
       await client.close();

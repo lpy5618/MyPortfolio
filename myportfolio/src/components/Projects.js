@@ -17,7 +17,11 @@ export const Projects = () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            const sortedProjects = data.sort((a, b) => a.id - b.id);
+            const sortedProjects = data.sort((a, b) => {
+                const orderA = a.order != null ? a.order : a.id;
+                const orderB = b.order != null ? b.order : b.id;
+                return orderA - orderB;
+            });
             setProjects(sortedProjects);
         } catch (error) {
             setError(`Error fetching projects: ${error.message}`);

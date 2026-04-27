@@ -15,7 +15,7 @@ export const Footer = () => {
         clearTimeout(clickTimer.current);
         if (clickCount.current >= 5) {
             clickCount.current = 0;
-            navigate('/add-project');
+            navigate('/admin');
         } else {
             clickTimer.current = setTimeout(() => {
                 clickCount.current = 0;
