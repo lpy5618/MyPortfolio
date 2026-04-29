@@ -25,6 +25,24 @@ const uploadImage = async (file) => {
     return publicUrl;
 };
 
+const parseArrayField = (value) => {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+        try { const parsed = JSON.parse(value); return Array.isArray(parsed) ? parsed : []; }
+        catch { return []; }
+    }
+    return [];
+};
+
+const parseField = (value, fallback) => {
+    if (value && typeof value === 'object') return value;
+    if (typeof value === 'string') {
+        try { const parsed = JSON.parse(value); return (typeof parsed === 'object' && parsed) ? parsed : fallback; }
+        catch { return fallback; }
+    }
+    return fallback;
+};
+
 export const ProjectForm = ({ mode = "add" }) => {
     const navigate = useNavigate();
     const { id } = useParams();
@@ -64,9 +82,9 @@ export const ProjectForm = ({ mode = "add" }) => {
                         description: data.description || "",
                         imgUrl: data.imgUrl || "",
                         summary: data.summary || "",
-                        techStack: (typeof data.techStack === 'object' && data.techStack) ? data.techStack : {},
-                        outcome: Array.isArray(data.outcome) ? data.outcome : [],
-                        demoImages: Array.isArray(data.demoImages) ? data.demoImages : [],
+                        techStack: parseField(data.techStack, {}),
+                        outcome: parseArrayField(data.outcome),
+                        demoImages: parseArrayField(data.demoImages),
                         conclusion: data.conclusion || ""
                     });
                 } catch (err) {
