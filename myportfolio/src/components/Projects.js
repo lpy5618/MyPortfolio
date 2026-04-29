@@ -84,15 +84,11 @@ export const Projects = () => {
                         <p>Here are some of my projects</p>
                         <Tab.Container id="projects-tabs" defaultActiveKey="tab-0">
                             <Nav variant="pills" className='nav-pills mb-5 justify-content-center align-items-center' id='pills-tab'>
-                                <Nav.Item>
-                                    <Nav.Link eventKey="tab-0">Tab One</Nav.Link>
-                                </Nav.Item>
-                                <Nav.Item>
-                                    <Nav.Link eventKey="tab-1">Tab Two</Nav.Link>
-                                </Nav.Item>
-                                <Nav.Item>
-                                    <Nav.Link eventKey="tab-2">Tab Three</Nav.Link>
-                                </Nav.Item>
+                                {projectChunks.map((_, tabIndex) => (
+                                    <Nav.Item key={tabIndex}>
+                                        <Nav.Link eventKey={`tab-${tabIndex}`}>Tab {tabIndex + 1}</Nav.Link>
+                                    </Nav.Item>
+                                ))}
                             </Nav>
                             <Tab.Content>
                                 {projectChunks.map((chunk, tabIndex) => (

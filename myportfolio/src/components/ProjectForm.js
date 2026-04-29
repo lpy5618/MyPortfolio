@@ -64,9 +64,9 @@ export const ProjectForm = ({ mode = "add" }) => {
                         description: data.description || "",
                         imgUrl: data.imgUrl || "",
                         summary: data.summary || "",
-                        techStack: data.techStack || {},
-                        outcome: data.outcome || [],
-                        demoImages: data.demoImages || [],
+                        techStack: (typeof data.techStack === 'object' && data.techStack) ? data.techStack : {},
+                        outcome: Array.isArray(data.outcome) ? data.outcome : [],
+                        demoImages: Array.isArray(data.demoImages) ? data.demoImages : [],
                         conclusion: data.conclusion || ""
                     });
                 } catch (err) {
@@ -294,7 +294,7 @@ export const ProjectForm = ({ mode = "add" }) => {
                                     <div className="mt-2">
                                         {Object.entries(formDetails.techStack).map(([cat, items]) => (
                                             <div key={cat} className="tech-stack-item">
-                                                <span><strong>{cat}:</strong> {items.join(', ')}</span>
+                                                <span><strong>{cat}:</strong> {Array.isArray(items) ? items.join(', ') : items}</span>
                                                 <Button className="btn-remove" onClick={() => handleRemoveTechStack(cat)}>Remove</Button>
                                             </div>
                                         ))}

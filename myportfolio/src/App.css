@@ -395,7 +395,7 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
   overflow: hidden;
 }
 .project .nav.nav-pills .nav-item {
-  width: 33.33333%;
+  flex: 1;
 }
 .project .nav.nav-pills .nav-link {
   background-color: transparent;
@@ -410,6 +410,7 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
   transition: 0.3s ease-in-out;
   text-align: center;
   z-index: 0;
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 .project .nav.nav-pills .nav-link::before {
     content: "";
@@ -428,16 +429,10 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
 .project .nav.nav-pills .nav-link.active {
     border: 1px solid rgba(255, 255, 255, 1);
 }
-.nav-link#projects-tabs-tab-tab-0 {
-  border: 1px solid rgba(255, 255, 255, 0.5);
+.project .nav.nav-pills .nav-item:first-child .nav-link {
   border-radius: 55px 0px 0px 55px;
 }
-.nav-link#projects-tabs-tab-tab-1 {
-  border-top: 1px solid rgba(255, 255, 255, 0.5);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-}
-.nav-link#projects-tabs-tab-tab-2 {
-  border: 1px solid rgba(255, 255, 255, 0.5);
+.project .nav.nav-pills .nav-item:last-child .nav-link {
   border-radius: 0 55px 55px 0;
 }
 .proj-imgbx {
@@ -722,6 +717,7 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
   gap: 15px;
   align-items: center;
   margin-top: 25px;
+  flex-wrap: wrap;
 }
 .add-project .btn-cancel {
   font-weight: 700;
@@ -1003,6 +999,16 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
 }
 .admin-panel .btn-primary-action:hover::before {
   width: 100%;
+}
+@media (max-width: 768px) {
+  .admin-panel .btn-primary-action,
+  .add-project .btn-cancel {
+    padding: 12px 24px;
+    font-size: 15px;
+  }
+  .add-project .button-group {
+    gap: 10px;
+  }
 }
 
 /*Footer CSS*/

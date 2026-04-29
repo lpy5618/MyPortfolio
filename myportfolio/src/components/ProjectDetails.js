@@ -117,7 +117,7 @@ export const ProjectDetails = () => {
             <img
               className="d-block w-100 carousel-img"
               src={imgUrl}
-              alt={`demo image ${index + 1}`}
+              alt={`Demo ${index + 1}`}
               onClick={() => handleShow(imgUrl)}
               style={{ cursor: 'pointer' }}
             />
