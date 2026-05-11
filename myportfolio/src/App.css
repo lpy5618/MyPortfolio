@@ -1011,6 +1011,64 @@ nav.navbar .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
   }
 }
 
+/*404 Page CSS*/
+.not-found {
+  padding: 200px 0 150px;
+  background-color: #121212;
+  min-height: 100vh;
+}
+.not-found h1 {
+  font-size: 150px;
+  font-weight: 700;
+  background: linear-gradient(90.21deg, #AA367C -5.91%, #4A2FBD 111.58%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+.not-found h2 {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+.not-found p {
+  color: #B8B8B8;
+  font-size: 18px;
+  margin-bottom: 40px;
+}
+.not-found button {
+  font-weight: 700;
+  color: #000;
+  background-color: #fff;
+  padding: 14px 48px;
+  font-size: 18px;
+  border-radius: 20px;
+  position: relative;
+  transition: 0.3s ease-in-out;
+  overflow: hidden;
+}
+.not-found button span {
+  position: relative;
+  z-index: 1;
+}
+.not-found button:hover {
+  color: #fff;
+}
+.not-found button::before {
+  content: "";
+  background: #121212;
+  width: 0;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  transition: 0.3s ease-in-out;
+  border-radius: 20px;
+}
+.not-found button:hover::before {
+  width: 100%;
+}
+
 /*Footer CSS*/
 .footer {
   padding: 0 0 50px 0;

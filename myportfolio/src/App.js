@@ -10,6 +10,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { ProjectDetails } from './components/ProjectDetails';
 import { ProjectForm } from './components/ProjectForm';
 import { AdminPanel } from './components/AdminPanel';
+import { NotFound } from './components/NotFound';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/add-project" element={<ProjectForm mode="add" />} />
           <Route path="/edit-project/:id" element={<ProjectForm mode="edit" />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
       </div>

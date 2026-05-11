@@ -23,6 +23,26 @@ const S3_BUCKET = process.env.S3_BUCKET;
 const S3_PREFIX = 'projectImages/';
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL;
 
+// Rate limiting for auth attempts (in-memory, resets on cold start)
+const authAttempts = {};
+const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes
+const MAX_ATTEMPTS = 5;
+
+const isRateLimited = (ip) => {
+  const now = Date.now();
+  if (!authAttempts[ip]) {
+    authAttempts[ip] = [];
+  }
+  // Remove expired attempts
+  authAttempts[ip] = authAttempts[ip].filter(t => now - t < RATE_LIMIT_WINDOW);
+  return authAttempts[ip].length >= MAX_ATTEMPTS;
+};
+
+const recordAttempt = (ip) => {
+  if (!authAttempts[ip]) authAttempts[ip] = [];
+  authAttempts[ip].push(Date.now());
+};
+
 export const handler = async (event) => {
   console.log('Event: ', event);
 
@@ -46,6 +66,16 @@ export const handler = async (event) => {
     const body = JSON.parse(event.body);
 
     if (path.includes('auth')) {
+      const ip = event.requestContext?.http?.sourceIp || event.requestContext?.identity?.sourceIp || 'unknown';
+      
+      if (isRateLimited(ip)) {
+        return {
+          statusCode: 429,
+          headers: { 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ error: 'Too many attempts. Please try again later.' }),
+        };
+      }
+
       const adminPass = process.env.ADMIN_PASS || 'jeff2024admin';
       if (body.password === adminPass) {
         return {
@@ -54,6 +84,8 @@ export const handler = async (event) => {
           body: JSON.stringify({ authenticated: true }),
         };
       }
+
+      recordAttempt(ip);
       return {
         statusCode: 401,
         headers: { 'Access-Control-Allow-Origin': '*' },

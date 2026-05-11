@@ -200,7 +200,8 @@ export const ProjectForm = ({ mode = "add" }) => {
                 setAuthenticated(true);
                 setAuthError("");
             } else {
-                setAuthError("Incorrect password");
+                const data = await res.json();
+                setAuthError(data.error || "Incorrect password");
             }
         } catch {
             setAuthError("Verification failed, please try again");
