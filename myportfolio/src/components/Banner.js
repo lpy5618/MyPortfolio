@@ -17,7 +17,7 @@ export const Banner = () => {
     
         return () => { clearInterval(ticker) };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [delta])
+      }, [delta, text, loopNum, isDeleting])
     
       const handleConnectClick = () => {
         window.open('https://www.linkedin.com/in/puyuli/', '_blank');
